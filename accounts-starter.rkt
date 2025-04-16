@@ -56,7 +56,24 @@
 (@problem 1)
 ;; Design an abstract function (including signature, purpose, and tests) 
 ;; to simplify the remove-debtors and remove-profs functions defined below.
-;;
+
+; Boolean act act -> act
+(define (backtracking-remover fn b act)
+  (local [(define (fn-for-act act)
+            (cond [(false? act) b]
+                  [else
+                   (if (fn act)
+                       (join (fn-for-act (node-l act))
+                             (fn-for-act (node-r act)))
+                       (make-node (node-id act)
+                                  (node-name act)
+                                  (node-bal act)
+                                  (fn-for-act (node-l act))
+                                  (fn-for-act (node-r act))))]))]
+
+
+    (fn-for-act act))) 
+
 ;; Now re-define the original remove-debtors and remove-profs functions 
 ;; to use your abstract function. Remember, the signature and tests should 
 ;; not change from the original functions.
@@ -85,6 +102,7 @@
 
 (@template-origin Accounts)
 
+#;
 (define (remove-debtors act)
   (cond [(false? act) false]
         [else
@@ -97,6 +115,9 @@
                         (remove-debtors (node-l act))
                         (remove-debtors (node-r act))))]))
 
+(define (remove-debtors act)
+ (local [(define (bl-fn act) (negative? (node-bal act)))]
+         (backtracking-remover bl-fn false act)))
 
 (@htdf remove-profs)
 (@signature Accounts -> Accounts)
@@ -119,16 +140,9 @@
 (@template-origin Accounts)
 
 (define (remove-profs act)
-  (cond [(false? act) false]
-        [else
-         (if (has-prefix? "Prof." (node-name act))
-             (join (remove-profs (node-l act))
-                   (remove-profs (node-r act)))
-             (make-node (node-id act)
-                        (node-name act)
-                        (node-bal act)
-                        (remove-profs (node-l act))
-                        (remove-profs (node-r act))))]))
+ (local [(define (bl-fn act) (has-prefix? "Prof." (node-name act)))]
+         (backtracking-remover bl-fn false act)))
+ 
 
 
 (@htdf has-prefix?)
@@ -179,6 +193,9 @@
 ;; Using your new abstract function, design a function that removes from a given
 ;; BST any account where the name of the account holder has an odd number of
 ;; characters.  Call it remove-odd-characters.
+
+
+
 
 
 (@problem 3)
