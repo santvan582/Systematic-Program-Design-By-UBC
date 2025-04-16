@@ -116,8 +116,8 @@
                         (remove-debtors (node-r act))))]))
 
 (define (remove-debtors act)
- (local [(define (bl-fn act) (negative? (node-bal act)))]
-         (backtracking-remover bl-fn false act)))
+  (local [(define (bl-fn act) (negative? (node-bal act)))]
+    (backtracking-remover bl-fn false act)))
 
 (@htdf remove-profs)
 (@signature Accounts -> Accounts)
@@ -140,8 +140,8 @@
 (@template-origin Accounts)
 
 (define (remove-profs act)
- (local [(define (bl-fn act) (has-prefix? "Prof." (node-name act)))]
-         (backtracking-remover bl-fn false act)))
+  (local [(define (bl-fn act) (has-prefix? "Prof." (node-name act)))]
+    (backtracking-remover bl-fn false act)))
  
 
 
@@ -193,7 +193,20 @@
 ;; Using your new abstract function, design a function that removes from a given
 ;; BST any account where the name of the account holder has an odd number of
 ;; characters.  Call it remove-odd-characters.
+(check-expect (remove-odd-characters ACT4) (make-node 4 "Mrs. Doubtfire"  -3
+                                                      false
+                                                      false))
+(check-expect (remove-odd-characters ACT42)  (make-node 42 "Mr. Mom" -79
+                                                        (make-node 14 "Mr. Impossible" -9 false false)
+                                                        (make-node 50 "Miss 604"  16 false false)))
 
+(check-expect (remove-odd-characters ACT3) (remove-odd-characters ACT4))
+
+;(define (remove-odd-characters act) false) ;stub
+
+(define (remove-odd-characters act)
+   (local [(define (bl-fn act) (odd? (node-id act)))]
+    (backtracking-remover bl-fn false act)))
 
 
 
