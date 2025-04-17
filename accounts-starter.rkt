@@ -102,18 +102,6 @@
 
 (@template-origin Accounts)
 
-#;
-(define (remove-debtors act)
-  (cond [(false? act) false]
-        [else
-         (if (negative? (node-bal act))
-             (join (remove-debtors (node-l act))
-                   (remove-debtors (node-r act)))
-             (make-node (node-id act)
-                        (node-name act)
-                        (node-bal act)
-                        (remove-debtors (node-l act))
-                        (remove-debtors (node-r act))))]))
 
 (define (remove-debtors act)
   (local [(define (bl-fn act) (negative? (node-bal act)))]
@@ -205,7 +193,7 @@
 ;(define (remove-odd-characters act) false) ;stub
 
 (define (remove-odd-characters act)
-   (local [(define (bl-fn act) (odd? (node-id act)))]
+  (local [(define (bl-fn act) (odd? (node-id act)))]
     (backtracking-remover bl-fn false act)))
 
 
@@ -242,25 +230,55 @@ Violating one or more will cause your solution to receive 0 marks.
 
 (@template-origin Accounts)
 
+(check-expect (fold-copy ACT42) ACT42)
+
+
+(define (fold-copy act)
+  (local [(define (cf id name bal act1 act2) (make-node id name bal act1 act2))]
+         (fold-accounts cf false act)))
+
+
+(check-expect (fold-sum ACT10) (+ 22 -3 13 600 -79 40 -9 16 84))
+
+(define (fold-sum act)
+  (local [(define (cf id name bal act1 act2) (+ bal act1 act2))]
+         (fold-accounts cf 0 act)))
+
+;;(Number string Integer X X -> X) X Accounts -> X  
 (define (fold-accounts c1 b1 act)
-  (cond [(false? act) b1]
-        [else
-         (c1 (node-id act)
-             (node-name act)
-             (node-bal act)
-             (fold-accounts c1 b1 (node-l act))
-             (fold-accounts c1 b1 (node-r act)))]))
+  (local [(define (fold-act c1 b1 act)
+            (cond [(false? act) b1]
+                  [else
+                   (c1 (node-id act)
+                       (node-name act)
+                       (node-bal act)
+                       (fold-act c1 b1 (node-l act))
+                       (fold-act c1 b1 (node-r act)))]))]
+    (fold-act c1 b1 act)))
 
 
 (@problem 4)
 ;; Use fold-accounts to design a function called charge-fee that decrements
 ;; the balance of every account in a given collection by the monthly fee of 3
 ;; CAD.
+;;Account -> Account
+;;for every acciunt in tree charge fee of 3
+(check-expect (charge-fee ACT1) (make-node 1 "Mr. Rogers"  (- 3 22) false false))
+(check-expect (charge-fee ACT4) (make-node 4 "Mrs. Doubtfire" (- 3 -3)
+                        false
+                        (make-node 7 "Mr. Natural" ( - 3 13) false false)))
+(check-expect (charge-fee ACT3) (make-node 3 "Miss Marple"  ( - 3 600) (charge-fee ACT1) (charge-fee ACT4)))
 
-          
+;(define (charge-fee act) false) ; 
+
+(define (charge-fee act)
+  (local [(define (cf id name bal act1 act2) (make-node id name ( - 3 bal) act1 act2))]
+           (fold-accounts cf false act)))
 
 (@problem 5)
 ;; Suppose you needed to design a function to look up an account based on its
 ;; ID.
 ;; Would it be better to design the function using fold-act, or to design the
 ;; function using the fn-for-acts template?  Briefly justify your answer.
+
+;;usinig fn-for-act due to less complex
